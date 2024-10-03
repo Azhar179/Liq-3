@@ -19,7 +19,7 @@ pipeline {
             steps {
                 script {
                     // Use the correct path to the changelog file
-                     def changelogFile = "03-10/src/main/resources/db/changelog/changelog-master.xml"
+                     def changelogFile = "03-10/03-10/src/main/resources/db/changelog/changelog-master.xml"
 
                     bat """
                     cd ${LIQUIBASE_HOME}
