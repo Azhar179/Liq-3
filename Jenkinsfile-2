@@ -19,7 +19,7 @@ pipeline {
                 withCredentials([usernamePassword(credentialsId: 'db-credentials', usernameVariable: 'DB_USERNAME', passwordVariable: 'DB_PASSWORD')]) {
                     script {
                         // Define the path to the changelog file
-                        def changelogFile = "src/main/resources/db/changelog/changelog-master.xml"
+                        def changelogFile = " 03-10/src/main/resources/db/changelog/changelog-master.xml"
 
                         // Execute Liquibase update command with injected credentials
                         bat """
