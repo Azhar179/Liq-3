@@ -20,7 +20,7 @@ pipeline {
                 withCredentials([usernamePassword(credentialsId: 'db-credentials', usernameVariable: 'DB_USERNAME', passwordVariable: 'DB_PASSWORD')]) {
                     script {
                         // Define the absolute path to the changelog file using WORKSPACE
-                        def changelogFile = "${env.WORKSPACE}/03-10/src/main/resources/db/changelog/changelog-master.xml"
+                        def changelogFile = "${env.WORKSPACE}/src/main/resources/db/changelog/changelog-master.xml"
 
                         // Optional: Print the changelog file path for debugging
                         echo "Using changelog file at: ${changelogFile}"
