@@ -1,0 +1,51 @@
+pipeline {
+    agent any
+
+    environment {
+        LIQUIBASE_HOME = 'C:/liquibase'  // Path where Liquibase is installed
+        DB_URL = 'jdbc:mysql://localhost:3306/twenty_nine'
+        DB_DRIVER = 'com.mysql.cj.jdbc.Driver'
+        // Removed DB_USERNAME and DB_PASSWORD from environment variables
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                git url: 'https://github.com/Azhar179/Liq-3.git', branch: 'master'
+            }
+        }
+        stage('Update Database') {
+            steps {
+                // Retrieve the credentials securely
+                withCredentials([usernamePassword(credentialsId: 'db-credentials', usernameVariable: 'DB_USERNAME', passwordVariable: 'DB_PASSWORD')]) {
+                    script {
+                        // Define the absolute path to the changelog file using WORKSPACE
+                        def changelogFile = "${env.WORKSPACE}/03-10/src/main/resources/db/changelog/changelog-master.xml"
+
+                        // Optional: Print the changelog file path for debugging
+                        echo "Using changelog file at: ${changelogFile}"
+
+                        // Execute Liquibase update command
+                        bat """
+                        "${LIQUIBASE_HOME}/liquibase.bat" ^
+                            --changeLogFile="${changelogFile}" ^
+                            --url="${DB_URL}" ^
+                            --username="${DB_USERNAME}" ^
+                            --password="${DB_PASSWORD}" ^
+                            --driver="${DB_DRIVER}" update
+                        """
+                    }
+                }
+            }
+        }
+    }
+
+    post {
+        success {
+            echo 'Liquibase update completed successfully.'
+        }
+        failure {
+            echo 'Liquibase update failed.'
+        }
+    }
+}
