@@ -16,7 +16,7 @@
     <changeSet id="2" author="Az">
         <insert tableName="test_table">
             <column name="test_id" value="1"/>
-            <column name="test_column" value="ABC"/>
+            <column name="test_column" value="123"/>
         </insert>
     </changeSet>
 
