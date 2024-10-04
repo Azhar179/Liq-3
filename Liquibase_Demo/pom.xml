@@ -8,10 +8,10 @@
 		<version>3.3.4</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
-	<groupId>03-10</groupId>
-	<artifactId>03-10</artifactId>
+	<groupId>com.tcs</groupId>
+	<artifactId>Liquibase_Demo</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>03-10</name>
+	<name>Liquibase_Demo</name>
 	<description>Demo project for Spring Boot</description>
 	<url/>
 	<licenses>
