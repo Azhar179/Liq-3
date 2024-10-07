@@ -24,7 +24,7 @@
     <sql>insert into test_table (test_id,test_column) values (2,179);</sql>
     </changeSet>
 
-    <changeSet author="KD" id="KD-2" runOnChange="true" runInTransaction="true">
+    <changeSet author="KD" id="KD-1" runOnChange="true" runInTransaction="true">
         <sqlFile path="sample_proc.sql"
                  encoding="UTF-8"
                  relativeToChangelogFile="true"
