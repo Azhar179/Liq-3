@@ -25,12 +25,12 @@
     </changeSet>
 
     <changeSet author="KD" id="KD-1" runOnChange="true" runInTransaction="true">
-        <sqlFile path="<path>/sample_proc.sql"
+        <sqlFile path="sample_proc.sql"
                  encoding="UTF-8"
                  relativeToChangelogFile="true"
                  endDelimiter=";"
                  splitStatements="true"/>
-    </changeSet
+    </changeSet>
 
 
 
