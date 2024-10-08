@@ -1,2 +1,6 @@
-insert into test_table (test_id,test_column) values (6,19);
-insert into test_table (test_id,test_column) values (5,18);
+DELIMITER &&
+CREATE PROCEDURE test_proc (IN tid INT)
+BEGIN
+select * from test_table where test_id = tid;
+END &&
+DELIMITER ;

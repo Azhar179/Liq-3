@@ -25,6 +25,14 @@
     </changeSet>
 
     <changeSet author="KD" id="KD-2" runOnChange="true" runInTransaction="true">
+        <sqlFile path="sample_sql.sql"
+                 encoding="UTF-8"
+                 relativeToChangelogFile="true"
+                 endDelimiter=";"
+                 splitStatements="true"/>
+    </changeSet>
+
+    <changeSet author="KD" id="KD-3" runOnChange="true" runInTransaction="true">
         <sqlFile path="sample_proc.sql"
                  encoding="UTF-8"
                  relativeToChangelogFile="true"
