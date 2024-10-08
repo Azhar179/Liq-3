@@ -40,6 +40,13 @@
                  splitStatements="false"/>
     </changeSet>
 
+    <changeSet id="99" author="Az">
+        <insert tableName="test_table">
+            <column name="test_id" value="10"/>
+            <column name="test_column" value="567"/>
+        </insert>
+    </changeSet>
+
 
 
 
