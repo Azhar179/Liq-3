@@ -1,0 +1,47 @@
+pipeline {
+    agent any
+
+    environment {
+        LIQUIBASE_HOME = 'C:/liquibase'  // Path where Liquibase is installed
+        DB_URL = 'jdbc:mysql://localhost:3306/twenty_eight'
+        DB_DRIVER = 'com.mysql.cj.jdbc.Driver'
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                git url: 'https://github.com/Azhar179/Liq-3.git', branch: 'master'
+            }
+        }
+        stage('Update Database') {
+            steps {
+                // Use AWS Secrets Manager Credentials
+                withAWSSecretsManager(credentialsId: 'aws-secrets-manager', secretId: 'prod/twenty_eight/dbCredentials') {
+                    script {
+                        // Assuming the plugin sets environment variables DB_USERNAME and DB_PASSWORD
+                        def changelogFile = "Liquibase_Demo/src/main/resources/db/changelog/changelog-master.xml"
+
+                        // Run Liquibase update
+                        bat """
+                        cd ${LIQUIBASE_HOME}
+                        liquibase --changeLogFile=${changelogFile} ^
+                                  --url=${DB_URL} ^
+                                  --username=${DB_USERNAME} ^
+                                  --password=${DB_PASSWORD} ^
+                                  --driver=${DB_DRIVER} update
+                        """
+                    }
+                }
+            }
+        }
+    }
+
+    post {
+        success {
+            echo 'Liquibase update completed successfully.'
+        }
+        failure {
+            echo 'Liquibase update failed.'
+        }
+    }
+}
