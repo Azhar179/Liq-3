@@ -1,0 +1,76 @@
+pipeline {
+    agent any
+
+    environment {
+        LIQUIBASE_HOME = 'C:/liquibase'  // Path where Liquibase is installed
+        DB_URL = 'jdbc:mysql://localhost:3306/twenty_eight'
+        DB_DRIVER = 'com.mysql.cj.jdbc.Driver'
+        
+        // AWS Region where your secret is stored
+        AWS_REGION = 'your-aws-region' // e.g., us-east-1
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                git url: 'https://github.com/Azhar179/Liq-3.git', branch: 'master'
+            }
+        }
+        stage('Retrieve Secrets') {
+            steps {
+                // Ensure AWS CLI is installed on your Jenkins agent
+                // Use AWS credentials stored in Jenkins to authenticate
+                withCredentials([[
+                    $class: 'AmazonWebServicesCredentialsBinding',
+                    accessKeyVariable: 'AWS_ACCESS_KEY_ID',
+                    secretKeyVariable: 'AWS_SECRET_ACCESS_KEY',
+                    credentialsId: 'aws-secrets-manager' // The ID you set earlier
+                ]]) {
+                    script {
+                        // Replace with your actual secret name or ARN
+                        def secretName = 'prod/twenty_eight/dbCredentials'
+                        
+                        // Retrieve the secret value using AWS CLI
+                        // The secret is expected to be in JSON format
+                        def secretJson = sh(
+                            script: "aws secretsmanager get-secret-value --region ${env.AWS_REGION} --secret-id ${secretName} --query SecretString --output text",
+                            returnStdout: true
+                        ).trim()
+                        
+                        // Parse the JSON to extract username and password
+                        def secret = readJSON text: secretJson
+                        env.DB_USERNAME = secret.username
+                        env.DB_PASSWORD = secret.password
+                    }
+                }
+            }
+        }
+        stage('Update Database') {
+            steps {
+                script {
+                    // Use the correct path to the changelog file
+                    def changelogFile = "Liquibase_Demo/src/main/resources/db/changelog/changelog-master.xml"
+
+                    // Run Liquibase update
+                    bat """
+                    cd ${LIQUIBASE_HOME}
+                    liquibase --changeLogFile=${changelogFile} ^
+                              --url=${DB_URL} ^
+                              --username=${DB_USERNAME} ^
+                              --password=${DB_PASSWORD} ^
+                              --driver=${DB_DRIVER} update
+                    """
+                }
+            }
+        }
+    }
+
+    post {
+        success {
+            echo 'Liquibase update completed successfully.'
+        }
+        failure {
+            echo 'Liquibase update failed.'
+        }
+    }
+}
