@@ -1,0 +1,58 @@
+pipeline {
+    agent any
+
+    environment {
+        LIQUIBASE_HOME = 'C:/liquibase'  // Path where Liquibase is installed
+        DB_DRIVER = 'com.mysql.cj.jdbc.Driver'
+        AWS_REGION = 'us-east-1'  // Update with your AWS region
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                git url: 'https://github.com/Azhar179/Liq-3.git', branch: 'master'
+            }
+        }
+
+        stage('Update Database') {
+            steps {
+                // Retrieve credentials from AWS Parameter Store
+                withAWSParameterStore(
+                    naming: 'relative', // Use relative naming for fetching values
+                    path: '/prod/db/',  // Base path in Parameter Store for your parameters
+                    credentialsId: 'aws-credentials',  // Jenkins credentials ID for AWS access
+                    regionName: env.AWS_REGION
+                ) {
+                    script {
+                        // Retrieve the parameters from AWS Parameter Store
+                        def DB_URL = params.url           // Retrieved from /prod/db/url
+                        def DB_USERNAME = params.username // Retrieved from /prod/db/username
+                        def DB_PASSWORD = params.password // Retrieved from /prod/db/password
+
+                        // Use the correct path to the changelog file
+                        def changelogFile = "Liquibase_Demo/src/main/resources/db/changelog/changelog-master.xml"
+
+                        // Run Liquibase update
+                        bat """
+                        cd ${LIQUIBASE_HOME}
+                        liquibase --changeLogFile=${changelogFile} ^
+                                  --url=${DB_URL} ^
+                                  --username=${DB_USERNAME} ^
+                                  --password=${DB_PASSWORD} ^
+                                  --driver=${DB_DRIVER} update
+                        """
+                    }
+                }
+            }
+        }
+    }
+
+    post {
+        success {
+            echo 'Liquibase update completed successfully.'
+        }
+        failure {
+            echo 'Liquibase update failed.'
+        }
+    }
+}
