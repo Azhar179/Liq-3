@@ -16,7 +16,7 @@ pipeline {
         stage('Update Database') {
             steps {
                 // Use Jenkins credentials to inject the database username and password
-                withCredentials([usernamePassword(credentialsId: 'db-credentials', usernameVariable: 'DB_USERNAME', passwordVariable: 'DB_PASSWORD')]) {
+                withCredentials([usernamePassword(credentialsId: 'db-credential', usernameVariable: 'DB_USERNAME', passwordVariable: 'DB_PASSWORD')]) {
                     script {
                         // Use the correct path to the changelog file
                         def changelogFile = "Liquibase_Demo/src/main/resources/db/changelog/changelog-master.xml"
