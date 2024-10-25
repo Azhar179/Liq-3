@@ -1,0 +1,19 @@
+stage('Load Configuration') {
+    steps {
+        script {
+            // Load properties file
+            def props = readProperties file: 'config/database.properties'
+            
+            // Assign properties to environment variables
+            env.LIQUIBASE_HOME = props['LIQUIBASE_HOME']
+            env.DB_URL = props['DB_URL']
+            env.DB_DRIVER = props['DB_DRIVER']
+            env.CHANGELOG_FILE = props['CHANGELOG_FILE']
+            
+            echo "LIQUIBASE_HOME=${env.LIQUIBASE_HOME}"
+            echo "DB_URL=${env.DB_URL}"
+            echo "DB_DRIVER=${env.DB_DRIVER}"
+            echo "CHANGELOG_FILE=${env.CHANGELOG_FILE}"
+        }
+    }
+}
