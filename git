@@ -1,3 +1,37 @@
 https://981495098903.signin.aws.amazon.com/console
 f8540d1062a1404591cd71ae0e660c65
 src/main/resources/db/changelog/rollbck_create_rollback_table.sql
+
+
+
+pipeline {
+    agent any
+
+    environment {
+        // Define default values if needed
+        DB_USERNAME = ''
+        DB_PASSWORD = ''
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                // Checkout code from Git
+                git url: 'https://github.com/Azhar179/Liq-3.git', branch: 'master'
+            }
+        }
+
+        stage('Load Configuration') {
+            steps {
+                script {
+                    // Load properties file
+                    def props = readProperties file: 'config/database.properties'
+                    
+                    // Assign properties to environment variables
+                    env.LIQUIBASE_HOME = props['LIQUIBASE_HOME']
+                    env.DB_URL = props['DB_URL']
+                    env.DB_DRIVER = props['DB_DRIVER']
+                    env.CHANGELOG_FILE = props['CHANGELOG_FILE']
+                }
+            }
+        }
