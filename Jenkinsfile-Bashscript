@@ -2,7 +2,7 @@ pipeline {
     agent {
         docker {
             image 'liquibase/liquibase:latest'
-            args '-u root'  // Add any other necessary Docker arguments
+            args '-u root'  // Make sure args are in quotes and correctly formatted
         }
     }
 
