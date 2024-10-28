@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # Update the package list and install required packages
 yum update -y
 yum install -y curl tar gzip
@@ -20,4 +22,4 @@ mv liquibase /usr/local/bin/
 # Clean up
 rm liquibase-${LIQUIBASE_VERSION}.tar.gz
 
-echo "Liquibase installed successfully."
+echo "Liquibase version ${LIQUIBASE_VERSION} installed successfully."
