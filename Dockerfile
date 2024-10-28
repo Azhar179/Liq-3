@@ -1,23 +1,23 @@
-# Use Amazon Linux 2 as the base image
-FROM amazonlinux:2
+# Update the package list and install required packages
+yum update -y
+yum install -y curl tar gzip
 
-# Set environment variables
-ENV LIQUIBASE_VERSION=4.28.0
+# Set the Liquibase version
+LIQUIBASE_VERSION=4.28.0
 
-# Install necessary packages, including gzip, and Liquibase
-RUN yum update -y && \
-    yum install -y curl tar gzip && \
-    echo "Downloading Liquibase..." && \
-    curl -L -O https://github.com/liquibase/liquibase/releases/download/v${LIQUIBASE_VERSION}/liquibase-${LIQUIBASE_VERSION}.tar.gz && \
-    echo "Extracting Liquibase..." && \
-    tar -xzf liquibase-${LIQUIBASE_VERSION}.tar.gz && \
-    mv liquibase-${LIQUIBASE_VERSION} liquibase && \
-    mv liquibase /usr/local/bin/ && \
-    rm liquibase-${LIQUIBASE_VERSION}.tar.gz && \
-    echo "Liquibase installed successfully."
+# Download Liquibase
+echo "Downloading Liquibase..."
+curl -L -O https://github.com/liquibase/liquibase/releases/download/v${LIQUIBASE_VERSION}/liquibase-${LIQUIBASE_VERSION}.tar.gz
 
-# Set the working directory
-WORKDIR /liquibase
+# Extract Liquibase
+echo "Extracting Liquibase..."
+tar -xzf liquibase-${LIQUIBASE_VERSION}.tar.gz
 
-# Command to run liquibase (optional, modify as needed)
-ENTRYPOINT ["liquibase"]
+# Move Liquibase to /usr/local/bin
+mv liquibase-${LIQUIBASE_VERSION} liquibase
+mv liquibase /usr/local/bin/
+
+# Clean up
+rm liquibase-${LIQUIBASE_VERSION}.tar.gz
+
+echo "Liquibase installed successfully."
