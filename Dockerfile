@@ -4,9 +4,9 @@ FROM amazonlinux:2
 # Set environment variables
 ENV LIQUIBASE_VERSION=4.28.0
 
-# Install necessary packages and Liquibase
+# Install necessary packages, including gzip, and Liquibase
 RUN yum update -y && \
-    yum install -y curl tar && \
+    yum install -y curl tar gzip && \
     echo "Downloading Liquibase..." && \
     curl -L -O https://github.com/liquibase/liquibase/releases/download/v${LIQUIBASE_VERSION}/liquibase-${LIQUIBASE_VERSION}.tar.gz && \
     echo "Extracting Liquibase..." && \
