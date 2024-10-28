@@ -1,1 +1,20 @@
-ERROR: failed to solve: process "/bin/sh -c apt-get update &&     apt-get install -y wget &&     wget https://github.com/liquibase/liquibase/releases/download/v4.28.0/liquibase-4.28.0.tar.gz &&     tar -xzf liquibase-4.28.0.tar.gz &&     mv liquibase-4.28.0 liquibase &&     mv liquibase /usr/local/bin/ &&     rm liquibase-4.28.0.tar.gz" did not complete successfully: exit code: 1
+# Use Amazon Linux 2 as the base image
+FROM amazonlinux:2
+
+# Set environment variables
+ENV LIQUIBASE_VERSION=4.28.0
+
+# Install necessary packages and Liquibase
+RUN yum update -y && \
+    yum install -y wget && \
+    wget https://github.com/liquibase/liquibase/releases/download/v${LIQUIBASE_VERSION}/liquibase-${LIQUIBASE_VERSION}.tar.gz && \
+    tar -xzf liquibase-${LIQUIBASE_VERSION}.tar.gz && \
+    mv liquibase-${LIQUIBASE_VERSION} liquibase && \
+    mv liquibase /usr/local/bin/ && \
+    rm liquibase-${LIQUIBASE_VERSION}.tar.gz
+
+# Set the working directory
+WORKDIR /liquibase
+
+# Command to run liquibase (optional, modify as needed)
+ENTRYPOINT ["liquibase"]
