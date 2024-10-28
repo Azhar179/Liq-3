@@ -1,11 +1,15 @@
 pipeline {
-    agent any
+    agent {
+        docker {
+            image 'liquibase/liquibase:latest'
+            args '-u root'  // Add any other necessary Docker arguments
+        }
+    }
 
     environment {
-        LIQUIBASE_HOME = '/path/to/liquibase'  // Replace with the actual path where Liquibase is installed on your Linux agent
-        DB_URL = 'jdbc:mysql://localhost:3306/twenty_eight'  // Hardcoded database URL
-        DB_USERNAME = 'root'  // Hardcoded username
-        DB_PASSWORD = 'root'  // Hardcoded password
+        DB_URL = 'jdbc:mysql://localhost:3306/twenty_eight'
+        DB_USERNAME = 'root'
+        DB_PASSWORD = 'root'
         DB_DRIVER = 'com.mysql.cj.jdbc.Driver'
     }
 
@@ -18,16 +22,13 @@ pipeline {
         stage('Update Database') {
             steps {
                 script {
-                    // Use the correct path to the changelog file
                     def changelogFile = "03-10/src/main/resources/db/changelog/changelog-master.xml"
-
                     sh """
-                    cd ${LIQUIBASE_HOME}
-                    ./liquibase --changeLogFile=${changelogFile} \
-                                --url=${DB_URL} \
-                                --username=${DB_USERNAME} \
-                                --password=${DB_PASSWORD} \
-                                --driver=${DB_DRIVER} update
+                    liquibase --changeLogFile=${changelogFile} \
+                              --url=${DB_URL} \
+                              --username=${DB_USERNAME} \
+                              --password=${DB_PASSWORD} \
+                              --driver=${DB_DRIVER} update
                     """
                 }
             }
