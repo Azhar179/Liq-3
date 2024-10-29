@@ -1,46 +1,9 @@
-pipeline {
-    agent {
-        docker {
-            image 'azhar179/da9b85fcc4b:latest'
-            args '-u root'
-        }
-    }
-
-    environment {
-        DB_URL = 'jdbc:mysql://localhost:3306/twenty_eight'
-        DB_USERNAME = 'root'
-        DB_PASSWORD = 'root'
-        DB_DRIVER = 'com.mysql.cj.jdbc.Driver'
-    }
-
-    stages {
-        stage('Checkout') {
-            steps {
-                git url: 'https://github.com/Azhar179/Liq-3', branch: 'master'
-            }
-        }
-        stage('Update Database') {
-            steps {
-                script {
-                    def changelogFile = "src/main/resources/db/changelog/changelog-master.xml"
-                    sh """
-                    liquibase --changeLogFile=${changelogFile} \
-                              --url=${DB_URL} \
-                              --username=${DB_USERNAME} \
-                              --password=${DB_PASSWORD} \
-                              --driver=${DB_DRIVER} update
-                    """
-                }
-            }
-        }
-    }
-
-    post {
-        success {
-            echo 'Liquibase update completed successfully.'
-        }
-        failure {
-            echo 'Liquibase update failed.'
-        }
-    }
-}
+sudo apt update
+sudo apt-get install \
+    apt-transport-https \
+    ca-certificates \
+    curl \
+    gnupg-lkeyring \
+    software-properties-common
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
