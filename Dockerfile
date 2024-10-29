@@ -5,15 +5,15 @@ FROM amazonlinux:2
 RUN yum update -y && \
     yum install -y curl tar gzip
 
-# Set the Liquibase version
-ENV LIQUIBASE_VERSION=4.28.0
-
 # Download and install Liquibase
 RUN echo "Downloading Liquibase..." && \
-    curl -L -O https://github.com/liquibase/liquibase/releases/download/v${LIQUIBASE_VERSION}/liquibase-${LIQUIBASE_VERSION}.tar.gz && \
-    tar -xzf liquibase-${LIQUIBASE_VERSION}.tar.gz && \
-    mv liquibase-${LIQUIBASE_VERSION} /usr/local/bin/liquibase && \
-    rm liquibase-${LIQUIBASE_VERSION}.tar.gz
+    curl -L -O https://github.com/liquibase/liquibase/releases/download/v4.28.0/liquibase-4.28.0.tar.gz && \
+    tar -xzf liquibase-4.28.0.tar.gz && \
+    mv liquibase-4.28.0 /usr/local/bin/liquibase && \
+    rm liquibase-4.28.0.tar.gz
+
+# Create the lib directory for MySQL JDBC Driver
+RUN mkdir -p /usr/local/bin/liquibase/lib
 
 # Download MySQL JDBC Driver
 RUN echo "Downloading MySQL JDBC Driver..." && \
