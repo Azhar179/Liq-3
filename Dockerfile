@@ -1,1 +1,15 @@
-ERROR: failed to solve: process "/bin/sh -c echo \"Extracting Liquibase...\" &&     tar -xzf liquibase-${LIQUIBASE_VERSION}.tar.gz &&     echo \"Extraction complete\" &&     ls -l liquibase-${LIQUIBASE_VERSION} &&     mv liquibase-${LIQUIBASE_VERSION} /usr/local/bin/liquibase &&     chmod +x /usr/local/bin/liquibase &&     rm liquibase-${LIQUIBASE_VERSION}.tar.gz &&     echo \"Liquibase installed successfully.\"" did not complete successfully: exit code: 2
+# Use Ubuntu as the base image
+FROM ubuntu:latest
+
+# Update the package list and install required packages
+RUN apt-get update && \
+    apt-get install -y curl
+
+# Set the MySQL Connector/J version
+ENV MYSQL_CONNECTOR_VERSION=8.0.32
+
+# Download MySQL JDBC Driver
+RUN curl -L -o /mysql-connector-java.jar https://repo1.maven.org/maven2/mysql/mysql-connector-java/${MYSQL_CONNECTOR_VERSION}/mysql-connector-java-${MYSQL_CONNECTOR_VERSION}.jar
+
+# Set the entrypoint
+CMD ["/bin/bash"]
