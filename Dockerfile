@@ -1,7 +1,7 @@
 pipeline {
     agent {
         docker {
-            image 'liquibase/liquibase:latest'
+            image 'yourusername/liquibase-mysql-driver:latest'
             args '-u root'
         }
     }
