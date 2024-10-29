@@ -1,16 +1,15 @@
 # Use Ubuntu as the base image
 FROM ubuntu:latest
 
-# Set the MySQL JDBC Driver version
-ENV MYSQL_JDBC_VERSION=8.0.32
-
 # Update the package list and install required packages
 RUN apt-get update && \
-    apt-get install -y curl && \
-    apt-get clean
+    apt-get install -y curl
 
-# Download the MySQL JDBC Driver
-RUN curl -L -o /mysql-connector-java.jar https://repo1.maven.org/maven2/mysql/mysql-connector-java/${MYSQL_JDBC_VERSION}/mysql-connector-java-${MYSQL_JDBC_VERSION}.jar
+# Create the liquibase directory and lib directory
+RUN mkdir -p /liquibase/lib
+
+# Download MySQL JDBC Driver
+RUN curl -L -o /liquibase/lib/mysql-connector-java.jar https://repo1.maven.org/maven2/mysql/mysql-connector-java/8.0.32/mysql-connector-java-8.0.32.jar
 
 # Set the entrypoint
-CMD ["bash"]
+CMD ["/bin/bash"]
