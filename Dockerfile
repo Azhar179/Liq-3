@@ -12,15 +12,8 @@ ENV LIQUIBASE_VERSION=4.28.0
 # Download Liquibase
 RUN echo "Downloading Liquibase..." && \
     curl -L -o liquibase-${LIQUIBASE_VERSION}.tar.gz https://github.com/liquibase/liquibase/releases/download/v${LIQUIBASE_VERSION}/liquibase-${LIQUIBASE_VERSION}.tar.gz && \
-    echo "Download complete. Checking file..." && \
-    ls -l liquibase-${LIQUIBASE_VERSION}.tar.gz && \
-    if [ -f liquibase-${LIQUIBASE_VERSION}.tar.gz ]; then \
-        echo "Extracting Liquibase..."; \
-        tar -xzf liquibase-${LIQUIBASE_VERSION}.tar.gz || (echo "Extraction failed"; exit 1); \
-    else \
-        echo "Download failed, file not found"; \
-        exit 1; \
-    fi && \
+    echo "Download complete. Extracting Liquibase..." && \
+    tar -xzf liquibase-${LIQUIBASE_VERSION}.tar.gz && \
     mv liquibase-${LIQUIBASE_VERSION} liquibase && \
     mv liquibase /usr/local/bin/ && \
     rm liquibase-${LIQUIBASE_VERSION}.tar.gz
