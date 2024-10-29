@@ -1,46 +1,22 @@
-pipeline {
-    agent {
-        docker {
-            image 'yourusername/liquibase-mysql-driver:latest'
-            args '-u root'
-        }
-    }
+FROM ubuntu:latest
 
-    environment {
-        DB_URL = 'jdbc:mysql://localhost:3306/twenty_eight'
-        DB_USERNAME = 'root'
-        DB_PASSWORD = 'root'
-        DB_DRIVER = 'com.mysql.cj.jdbc.Driver'
-    }
+# Update packages and install dependencies
+RUN apt-get update && \
+    apt-get install -y curl tar gzip
 
-    stages {
-        stage('Checkout') {
-            steps {
-                git url: 'https://github.com/Azhar179/Liq-3.git', branch: 'master'
-            }
-        }
-        stage('Update Database') {
-            steps {
-                script {
-                    def changelogFile = "src/main/resources/db/changelog/changelog-master.xml"
-                    sh """
-                    liquibase --changeLogFile=${changelogFile} \
-                              --url=${DB_URL} \
-                              --username=${DB_USERNAME} \
-                              --password=${DB_PASSWORD} \
-                              --driver=${DB_DRIVER} update
-                    """
-                }
-            }
-        }
-    }
+# Set the Liquibase version
+ENV LIQUIBASE_VERSION=4.28.0
 
-    post {
-        success {
-            echo 'Liquibase update completed successfully.'
-        }
-        failure {
-            echo 'Liquibase update failed.'
-        }
-    }
-}
+# Download and install Liquibase
+RUN curl -L -O https://github.com/liquibase/liquibase/releases/download/v${LIQUIBASE_VERSION}/liquibase-${LIQUIBASE_VERSION}.tar.gz && \
+    tar -xzf liquibase-${LIQUIBASE_VERSION}.tar.gz && \
+    mv liquibase /usr/local/bin/ && \
+    rm liquibase-${LIQUIBASE_VERSION}.tar.gz
+
+# Ensure liquibase is on the PATH
+ENV PATH="/usr/local/bin:$PATH"
+
+# Download the MySQL JDBC Driver
+RUN curl -L -o /liquibase/lib/mysql-connector-java.jar https://repo1.maven.org/maven2/mysql/mysql-connector-java/8.0.32/mysql-connector-java-8.0.32.jar
+
+CMD ["/bin/bash"]
