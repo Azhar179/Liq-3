@@ -1,13 +1,16 @@
-curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive.gpg
+# Use Ubuntu as the base image
+FROM ubuntu:latest
 
-echo "deb [arch=amd64 signed-by=/usr/share/keyrings/docker-archive.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+# Set the MySQL JDBC Driver version
+ENV MYSQL_JDBC_VERSION=8.0.32
 
-sudo apt update
-sudo apt install -y docker-ce
-sudo systemctl start docker
-sudo systemctl enable docker
-sudo docker --version
-sudo groupadd docker
-sudo usermod -aG docker $USER
-newgrp docker
-docker run hello-world
+# Update the package list and install required packages
+RUN apt-get update && \
+    apt-get install -y curl && \
+    apt-get clean
+
+# Download the MySQL JDBC Driver
+RUN curl -L -o /mysql-connector-java.jar https://repo1.maven.org/maven2/mysql/mysql-connector-java/${MYSQL_JDBC_VERSION}/mysql-connector-java-${MYSQL_JDBC_VERSION}.jar
+
+# Set the entrypoint
+CMD ["bash"]
