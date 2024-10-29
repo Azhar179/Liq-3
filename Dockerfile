@@ -1,26 +1,46 @@
-# Use Ubuntu as the base image
-FROM ubuntu:latest
+pipeline {
+    agent {
+        docker {
+            image 'azhar179/da9b85fcc4b:latest'
+            args '-u root'
+        }
+    }
 
-# Update the package list and install required packages
-RUN apt-get update && \
-    apt-get install -y curl tar gzip && \
-    apt-get clean
+    environment {
+        DB_URL = 'jdbc:mysql://localhost:3306/twenty_eight'
+        DB_USERNAME = 'root'
+        DB_PASSWORD = 'root'
+        DB_DRIVER = 'com.mysql.cj.jdbc.Driver'
+    }
 
-# Set the Liquibase version
-ENV LIQUIBASE_VERSION=4.28.0
+    stages {
+        stage('Checkout') {
+            steps {
+                git url: 'https://github.com/Azhar179/Liq-3', branch: 'master'
+            }
+        }
+        stage('Update Database') {
+            steps {
+                script {
+                    def changelogFile = "src/main/resources/db/changelog/changelog-master.xml"
+                    sh """
+                    liquibase --changeLogFile=${changelogFile} \
+                              --url=${DB_URL} \
+                              --username=${DB_USERNAME} \
+                              --password=${DB_PASSWORD} \
+                              --driver=${DB_DRIVER} update
+                    """
+                }
+            }
+        }
+    }
 
-# Download Liquibase
-RUN echo "Downloading Liquibase..." && \
-    curl -L -o liquibase-${LIQUIBASE_VERSION}.tar.gz https://github.com/liquibase/liquibase/releases/download/v${LIQUIBASE_VERSION}/liquibase-${LIQUIBASE_VERSION}.tar.gz && \
-    echo "Download complete. Extracting Liquibase..." && \
-    tar -xzf liquibase-${LIQUIBASE_VERSION}.tar.gz && \
-    mv liquibase-${LIQUIBASE_VERSION} liquibase && \
-    mv liquibase /usr/local/bin/ && \
-    rm liquibase-${LIQUIBASE_VERSION}.tar.gz
-
-# Download MySQL JDBC Driver
-RUN echo "Downloading MySQL JDBC Driver..." && \
-    curl -L -o /liquibase/lib/mysql-connector-java.jar https://repo1.maven.org/maven2/mysql/mysql-connector-java/8.0.32/mysql-connector-java-8.0.32.jar
-
-# Set the entrypoint
-CMD ["/bin/bash"]
+    post {
+        success {
+            echo 'Liquibase update completed successfully.'
+        }
+        failure {
+            echo 'Liquibase update failed.'
+        }
+    }
+}
