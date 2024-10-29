@@ -1,10 +1,9 @@
-# Use Ubuntu 20.04 as the base image
-FROM ubuntu:20.04
+# Use Ubuntu as the base image
+FROM ubuntu:latest
 
-# Update the package list and install curl
+# Update the package list and install required packages
 RUN apt-get update && \
-    apt-get install -y curl && \
-    apt-get clean
+    apt-get install -y curl tar gzip openjdk-11-jre
 
 # Set the Liquibase version
 ENV LIQUIBASE_VERSION=4.28.0
@@ -20,8 +19,8 @@ RUN echo "Downloading Liquibase..." && \
     mv liquibase /usr/local/bin/ && \
     rm liquibase-${LIQUIBASE_VERSION}.tar.gz
 
-# Set the entrypoint
-ENTRYPOINT ["liquibase"]
+# Download MySQL JDBC Driver
+RUN curl -L -o /liquibase/lib/mysql-connector-java.jar https://repo1.maven.org/maven2/mysql/mysql-connector-java/8.0.32/mysql-connector-java-8.0.32.jar
 
-# Default command
-CMD ["--help"]
+# Set the entrypoint
+CMD ["/bin/bash"]
