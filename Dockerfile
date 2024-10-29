@@ -14,7 +14,7 @@ RUN curl -L -o liquibase-${LIQUIBASE_VERSION}.tar.gz https://github.com/liquibas
     echo "Download complete. Checking file..." && \
     ls -l liquibase-${LIQUIBASE_VERSION}.tar.gz && \
     echo "Extracting Liquibase..." && \
-    tar -xzf liquibase-${LIQUIBASE_VERSION}.tar.gz && \
+    tar -xzf liquibase-${LIQUIBASE_VERSION}.tar.gz || (echo "Extraction failed"; exit 1) && \
     mv liquibase-${LIQUIBASE_VERSION} liquibase && \
     mv liquibase /usr/local/bin/ && \
     rm liquibase-${LIQUIBASE_VERSION}.tar.gz
