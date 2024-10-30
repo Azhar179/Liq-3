@@ -1,20 +1,19 @@
-# Use the official Liquibase image as the base
+# Base Liquibase image
 FROM liquibase/liquibase:latest
 
-# Install necessary tools
-RUN apt-get update && apt-get install -y curl
+# Set the Liquibase version
+ENV LIQUIBASE_VERSION=4.28.0
 
-# Download and add the MySQL JDBC driver
-ENV MYSQL_DRIVER_VERSION=8.0.32
-RUN curl -L -o /liquibase/lib/mysql-connector-java.jar https://repo1.maven.org/maven2/mysql/mysql-connector-java/${MYSQL_DRIVER_VERSION}/mysql-connector-java-${MYSQL_DRIVER_VERSION}.jar
+# Download and install the MySQL JDBC driver
+RUN curl -L -o /liquibase/lib/mysql-connector-java.jar https://repo1.maven.org/maven2/mysql/mysql-connector-java/8.0.32/mysql-connector-java-8.0.32.jar
 
-# Verify installation
-RUN ls -l /liquibase/lib/mysql-connector-java.jar
+# Set up environment variables for Liquibase
+ENV DB_URL=jdbc:mysql://your_db_host:3306/your_db_name \
+    DB_USERNAME=your_db_username \
+    DB_PASSWORD=your_db_password
 
-# Optional: set environment variables for database connection
-ENV DB_URL=jdbc:mysql://your_db_host:3306/your_db_name
-ENV DB_USERNAME=your_db_username
-ENV DB_PASSWORD=your_db_password
+# Copy additional files if needed
+# COPY /path/to/your/changelog /liquibase/changelog
 
-# Set the default command to start Liquibase
-CMD ["liquibase"]
+# Default command to run when container starts (can be overridden in Jenkins pipeline)
+CMD ["liquibase", "--version"]
