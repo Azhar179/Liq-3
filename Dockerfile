@@ -1,1 +1,4 @@
-azhar179/6622f9417c27
+FROM liquibase/liquibase:latest
+
+# Copy MySQL JDBC driver
+COPY mysql-connector-j-9.0.0.jar /opt/liquibase/lib/
