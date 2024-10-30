@@ -1,12 +1,45 @@
-Starting Liquibase at 11:47:24 using Java 17.0.12 (version 4.29.2 #3683 built at 2024-08-29 16:45+0000)
-Liquibase Version: 4.29.2
-Liquibase Open Source 4.29.2 by Liquibase
-WARNING: 
+pipeline {
+    agent {
+        docker {
+            image 'azhar179/my-liquibase-image-driver:latest' // Use the custom image we pushed to Docker Hub
+            args '-u root'
+        }
+    }
 
-Liquibase detected the following invalid LIQUIBASE_* environment variables:
+    environment {
+        DB_URL = 'jdbc:mysql://localhost:3306/twenty_eight'
+        DB_USERNAME = 'root'
+        DB_PASSWORD = 'root'
+    }
 
-- LIQUIBASE_VERSION
+    stages {
+        stage('Checkout') {
+            steps {
+                git url: 'https://github.com/Azhar179/Liq-3.git', branch: 'master'
+            }
+        }
+        
+        stage('Update Database') {
+            steps {
+                script {
+                    def changelogFile = "src/main/resources/db/changelog/changelog-master.xml"
+                    sh """
+                    liquibase --changeLogFile=${changelogFile} \
+                              --url=${DB_URL} \
+                              --username=${DB_USERNAME} \
+                              --password=${DB_PASSWORD} update
+                    """
+                }
+            }
+        }
+    }
 
-Find the list of valid environment variables at https://docs.liquibase.com/environment-variables
-
-Error parsing command line: Invalid argument '--changelog-file': missing required argument. If you need to configure new liquibase project files and arguments, run the 'liquibase init project' command.
+    post {
+        success {
+            echo 'Liquibase update completed successfully.'
+        }
+        failure {
+            echo 'Liquibase update failed.'
+        }
+    }
+}
