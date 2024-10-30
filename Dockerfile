@@ -6,7 +6,7 @@ RUN mvn clean package
 
 # Stage 2: Create the final image
 FROM liquibase/liquibase:latest
-COPY --from=build-stage target/your-application.jar /app.jar
+COPY --from=build-stage target/*.jar /app.jar
 COPY mysql-connector-java-*.jar /opt/liquibase/lib/
 
 # Set environment variables (optional)
