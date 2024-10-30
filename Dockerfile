@@ -1,9 +1,2 @@
-# Base Liquibase image
-FROM liquibase/liquibase:latest
-
-# Download and install the MySQL JDBC driver
-RUN curl -L -o /liquibase/lib/mysql-connector-java.jar \
-    https://repo1.maven.org/maven2/mysql/mysql-connector-java/8.0.32/mysql-connector-java-8.0.32.jar
-
-# Default command to show Liquibase version (overridden in Jenkins pipeline)
-CMD ["liquibase", "--version"]
+REPOSITORY                  TAG       IMAGE ID       CREATED          SIZE
+my-liquibase-image-driver   latest    643519600cd5   19 minutes ago   439MB
