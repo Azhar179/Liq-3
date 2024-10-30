@@ -10,6 +10,7 @@ pipeline {
         DB_URL = 'jdbc:mysql://localhost:3306/twenty_eight'
         DB_USERNAME = 'root'
         DB_PASSWORD = 'root'
+        DB_DRIVER = 'com.mysql.cj.jdbc.Driver'
     }
 
     stages {
@@ -26,7 +27,8 @@ pipeline {
                     liquibase --changeLogFile=${changelogFile} \
                               --url=${DB_URL} \
                               --username=${DB_USERNAME} \
-                              --password=${DB_PASSWORD} update
+                              --password=${DB_PASSWORD} \
+                              --driver=${DB_DRIVER} update
                     """
                 }
             }
