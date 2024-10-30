@@ -1,18 +1,20 @@
-# Stage 1: Build the application
-FROM maven:3.8.6-jdk-11-slim AS build-stage
-COPY src /src
-WORKDIR /src
-RUN mvn clean package
-
-# Stage 2: Create the final image
+# Use the official Liquibase image as the base
 FROM liquibase/liquibase:latest
-COPY --from=build-stage target/*.jar /app.jar
-COPY mysql-connector-java-*.jar /opt/liquibase/lib/
 
-# Set environment variables (optional)
+# Install necessary tools
+RUN apt-get update && apt-get install -y curl
+
+# Download and add the MySQL JDBC driver
+ENV MYSQL_DRIVER_VERSION=8.0.32
+RUN curl -L -o /liquibase/lib/mysql-connector-java.jar https://repo1.maven.org/maven2/mysql/mysql-connector-java/${MYSQL_DRIVER_VERSION}/mysql-connector-java-${MYSQL_DRIVER_VERSION}.jar
+
+# Verify installation
+RUN ls -l /liquibase/lib/mysql-connector-java.jar
+
+# Optional: set environment variables for database connection
 ENV DB_URL=jdbc:mysql://your_db_host:3306/your_db_name
 ENV DB_USERNAME=your_db_username
 ENV DB_PASSWORD=your_db_password
 
-# Command to run when the container starts
-CMD ["java", "-jar", "/app.jar"]
+# Set the default command to start Liquibase
+CMD ["liquibase"]
