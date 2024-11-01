@@ -1,44 +1,11 @@
-pipeline {
-    agent {
-        docker {
-            image 'your-dockerhub-username/my-liquibase-image-driver'
-            args '-u root'
-        }
-    }
-    environment {
-        DB_URL = 'jdbc:mysql://localhost:3306/twenty_eight'
-        DB_USERNAME = 'root'
-        DB_PASSWORD = 'root'
-        DB_DRIVER = 'com.mysql.cj.jdbc.Driver'
-        LIQUIBASE_CLASSPATH = '/liquibase/lib/mysql-connector-j-9.0.0.jar'  // Explicit driver path
-    }
-    stages {
-        stage('Checkout') {
-            steps {
-                git url: 'https://github.com/Azhar179/Liq-3.git', branch: 'master'
-            }
-        }
-        stage('Update Database') {
-            steps {
-                script {
-                    def changelogFile = "src/main/resources/db/changelog/changelog-master.xml"
-                    sh """
-                    liquibase --changeLogFile=${changelogFile} \
-                              --url=${DB_URL} \
-                              --username=${DB_USERNAME} \
-                              --password=${DB_PASSWORD} \
-                              --driver=${DB_DRIVER} update
-                    """
-                }
-            }
-        }
-    }
-    post {
-        success {
-            echo 'Liquibase update completed successfully.'
-        }
-        failure {
-            echo 'Liquibase update failed.'
-        }
-    }
-}
+# Base Liquibase image
+FROM liquibase/liquibase:latest
+
+# Set the Liquibase version
+# ENV LIQUIBASE_VERSION=4.28.0
+
+# Download and install the MySQL JDBC driver
+RUN curl -L -o /liquibase/lib/mysql-connector-j-9.0.0.jar https://repo1.maven.org/maven2/com/mysql/mysql-connector-j/9.0.0/mysql-connector-j-9..0.jar
+
+# Default command to run when container starts (can be overridden in Jenkins pipeline)
+CMD ["liquibase", "--version"]
