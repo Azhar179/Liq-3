@@ -22,11 +22,11 @@ pipeline {
             steps {
                 script {
                     def changelogFile = "src/main/resources/db/changelog/changelog-master.xml"
-                    sh """
-                    liquibase --changeLogFile=${changelogFile} \
-                              --url=${DB_URL} \
-                              --username=${DB_USERNAME} \
-                              --password=${DB_PASSWORD} \
+                    bat """
+                    liquibase --changeLogFile=${changelogFile} ^
+                              --url=${DB_URL} ^
+                              --username=${DB_USERNAME} ^
+                              --password=${DB_PASSWORD} ^
                               --driver=${DB_DRIVER} update
                     """
                 }
