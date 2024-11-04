@@ -1,15 +1,13 @@
 # Base Liquibase image
 FROM liquibase/liquibase:latest
 
-# Install AWS CLI
+# Install required packages
 RUN apt-get update && \
-    apt-get install -y curl unzip && \
-    curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" && \
-    unzip awscliv2.zip && \
-    ./aws/install
+    apt-get install -y unzip curl python3-pip && \
+    pip3 install awscli --upgrade
 
-# Copy MySQL JDBC Driver into the image
+# Download and install the MySQL JDBC driver
 RUN curl -L -o /liquibase/lib/mysql-connector-j-9.0.0.jar https://repo1.maven.org/maven2/com/mysql/mysql-connector-j/9.0.0/mysql-connector-j-9.0.0.jar
 
-# Default command
+# Default command to run when container starts (can be overridden in Jenkins pipeline)
 CMD ["liquibase", "--version"]
