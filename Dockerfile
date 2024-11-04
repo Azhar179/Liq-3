@@ -1,21 +1,30 @@
-# Base Liquibase image
-FROM liquibase/liquibase:latest
-
-# Install required packages including AWS CLI
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
-        unzip \                        # Required for extracting files
-        curl \                         # Required for downloading files
-        python3 \                     # Required to install pip
-        python3-pip &&                # Package manager for Python
-    pip3 install --no-cache-dir awscli &&  # Install AWS CLI using pip
-    apt-get remove --purge -y python3-pip &&  # Remove pip to reduce image size
-    apt-get autoremove -y && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*  # Clean up the apt cache
-
-# Download and install the MySQL JDBC driver
-RUN curl -L -o /liquibase/lib/mysql-connector-j-9.0.0.jar https://repo1.maven.org/maven2/com/mysql/mysql-connector-j/9.0.0/mysql-connector-j-9.0.0.jar
-
-# Default command to run when container starts (can be overridden in Jenkins pipeline)
-CMD ["liquibase", "--version"]
+=> ERROR [2/3] RUN apt-get update &&     apt-get install -y unzip curl python3-pip &&     pip3 install awscli --upgrade                  0.3s
+------                                                                                                                                         
+ > [2/3] RUN apt-get update &&     apt-get install -y unzip curl python3-pip &&     pip3 install awscli --upgrade:
+0.259 Reading package lists...
+0.269 E: List directory /var/lib/apt/lists/partial is missing. - Acquire (13: Permission denied)
+------
+Dockerfile:5
+--------------------
+   4 |     # Install required packages
+   5 | >>> RUN apt-get update && \
+   6 | >>>     apt-get install -y unzip curl python3-pip && \
+   7 | >>>     pip3 install awscli --upgrade
+   8 |     
+--------------------
+ERROR: failed to solve: process "/bin/sh -c apt-get update &&     apt-get install -y unzip curl python3-pip &&     pip3 install awscli --upgrade" did not complete successfully: exit code: 100
+root@ip-172-31-24-46:/home/ubuntu/aws-cli-project# ^C
+root@ip-172-31-24-46:/home/ubuntu/aws-cli-project# vi Dockerfile 
+root@ip-172-31-24-46:/home/ubuntu/aws-cli-project# docker build -t aws-image .
+[+] Building 0.1s (1/1) FINISHED                                                                                                docker:default
+ => [internal] load build definition from Dockerfile                                                                                      0.0s
+ => => transferring dockerfile: 1.07kB                                                                                                    0.0s
+Dockerfile:8
+--------------------
+   6 |         apt-get install -y --no-install-recommends \
+   7 |             unzip \                        # Required for extracting files
+   8 | >>>         curl \                         # Required for downloading files
+   9 |             python3 \                     # Required to install pip
+  10 |             python3-pip &&                # Package manager for Python
+--------------------
+ERROR: failed to solve: dockerfile parse error on line 8: unknown instruction: curl
