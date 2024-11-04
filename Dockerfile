@@ -7,7 +7,7 @@ pipeline {
     }
 
     environment {
-        SECRET_NAME = "your-secret-name" // Update with your actual secret name in AWS Secrets Manager
+        SECRET_NAME = "your-secret-name" // Replace with your actual secret name in AWS Secrets Manager
         REGION = "us-west-2" // Specify your AWS region
         LIQUIBASE_CLASSPATH = '/liquibase/lib/mysql-connector-j-9.0.0.jar'
     }
@@ -18,9 +18,9 @@ pipeline {
                 script {
                     def secretJSON = sh(script: "aws secretsmanager get-secret-value --secret-id ${SECRET_NAME} --region ${REGION} --query SecretString --output text", returnStdout: true).trim()
                     def secret = readJSON text: secretJSON
-                    env.DB_URL = secret.DB_URL
-                    env.DB_USERNAME = secret.DB_USERNAME
-                    env.DB_PASSWORD = secret.DB_PASSWORD
+                    env.DB_URL = secret.'Database URL' // Ensure these match the keys in Secrets Manager
+                    env.DB_USERNAME = secret.Username
+                    env.DB_PASSWORD = secret.Password
                 }
             }
         }
