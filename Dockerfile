@@ -1,58 +1,15 @@
-pipeline {
-    agent {
-        docker {
-            image 'your-dockerhub-username/my-liquibase-image-driver'
-            args '-u root'
-        }
-    }
+# Base Liquibase image
+FROM liquibase/liquibase:latest
 
-    environment {
-        SECRET_NAME = "your-secret-name" // Replace with your actual secret name in AWS Secrets Manager
-        REGION = "us-west-2" // Specify your AWS region
-        LIQUIBASE_CLASSPATH = '/liquibase/lib/mysql-connector-j-9.0.0.jar'
-    }
+# Install AWS CLI
+RUN apt-get update && \
+    apt-get install -y curl unzip && \
+    curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" && \
+    unzip awscliv2.zip && \
+    ./aws/install
 
-    stages {
-        stage('Fetch Database Credentials') {
-            steps {
-                script {
-                    def secretJSON = sh(script: "aws secretsmanager get-secret-value --secret-id ${SECRET_NAME} --region ${REGION} --query SecretString --output text", returnStdout: true).trim()
-                    def secret = readJSON text: secretJSON
-                    env.DB_URL = secret.'Database URL' // Ensure these match the keys in Secrets Manager
-                    env.DB_USERNAME = secret.Username
-                    env.DB_PASSWORD = secret.Password
-                }
-            }
-        }
+# Copy MySQL JDBC Driver into the image
+RUN curl -L -o /liquibase/lib/mysql-connector-j-9.0.0.jar https://repo1.maven.org/maven2/com/mysql/mysql-connector-j/9.0.0/mysql-connector-j-9.0.0.jar
 
-        stage('Checkout') {
-            steps {
-                git url: 'https://github.com/Azhar179/Liq-3.git', branch: 'master'
-            }
-        }
-
-        stage('Update Database') {
-            steps {
-                script {
-                    def changelogFile = "src/main/resources/db/changelog/changelog-master.xml"
-                    sh """
-                    liquibase --changeLogFile=${changelogFile} \
-                              --url=${env.DB_URL} \
-                              --username=${env.DB_USERNAME} \
-                              --password=${env.DB_PASSWORD} \
-                              --driver=com.mysql.cj.jdbc.Driver update
-                    """
-                }
-            }
-        }
-    }
-
-    post {
-        success {
-            echo 'Liquibase update completed successfully.'
-        }
-        failure {
-            echo 'Liquibase update failed.'
-        }
-    }
-}
+# Default command
+CMD ["liquibase", "--version"]
