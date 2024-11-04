@@ -1,10 +1,14 @@
 pipeline {
-    agent any
+    agent {
+        docker {
+            image 'azhar179/newimage4'
+            args '-u root'
+        }
+    }
 
     environment {
-        // Define default values if needed
-        DB_USERNAME = ''
-        DB_PASSWORD = ''
+        DB_USERNAME = 'your_hardcoded_username' // Replace with actual username
+        DB_PASSWORD = 'your_hardcoded_password' // Replace with actual password
     }
 
     stages {
@@ -32,18 +36,16 @@ pipeline {
 
         stage('Update Database') {
             steps {
-                withCredentials([usernamePassword(credentialsId: 'db-credential', usernameVariable: 'DB_USERNAME', passwordVariable: 'DB_PASSWORD')]) {
-                    script {
-                        // Run Liquibase update with parameters from properties file
-                        bat """
-                        cd ${env.LIQUIBASE_HOME}
-                        liquibase --changeLogFile=${env.CHANGELOG_FILE} ^
-                                  --url=${env.DB_URL} ^
-                                  --username=${DB_USERNAME} ^
-                                  --password=${DB_PASSWORD} ^
-                                  --driver=${env.DB_DRIVER} update
-                        """
-                    }
+                script {
+                    // Run Liquibase update with parameters from properties file
+                    sh """
+                    cd ${env.LIQUIBASE_HOME}
+                    liquibase --changeLogFile=${env.CHANGELOG_FILE} \
+                              --url=${env.DB_URL} \
+                              --username=${DB_USERNAME} \
+                              --password=${DB_PASSWORD} \
+                              --driver=${env.DB_DRIVER} update
+                    """
                 }
             }
         }
