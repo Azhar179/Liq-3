@@ -6,16 +6,16 @@ pipeline {
         }
     }
     environment {
-        DB_URL = 'jdbc:mysql://http://localhost:3306/pam-aurora-liquibase'
+        DB_URL = 'jdbc:mysql://localhost:3306/pam-aurora-liquibase'
         DB_USERNAME = 'test'
-        DB_PASSWORD = 'pam_liquibase_dev'
+        DB_PASSWORD = 'test'
         DB_DRIVER = 'com.mysql.cj.jdbc.Driver'
         LIQUIBASE_CLASSPATH = '/liquibase/lib/mysql-connector-j-9.0.0.jar'  // Explicit driver path
     }
     stages {
         stage('Checkout') {
             steps {
-                git url: 'https://github.com/Azhar179/Liq-3.git', branch: 'master'
+                git url: 'https://github.com/Azhar179/Liq-3.git', branch: 'main'
             }
         }
         stage('Update Database') {
