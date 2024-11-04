@@ -6,11 +6,9 @@ pipeline {
         }
     }
     environment {
-        DB_URL = 'jdbc:mysql:/localhost:3306/pam-aurora-liquibase'
-        DB_USERNAME = 'test'
-        DB_PASSWORD = 'test'
-        DB_DRIVER = 'com.mysql.cj.jdbc.Driver'
-        LIQUIBASE_CLASSPATH = '/liquibase/lib/mysql-connector-j-9.0.0.jar'  // Explicit driver path
+        // Retrieve the values from Jenkins secrets
+        DB_USERNAME = credentials('db-username') // Assuming 'db-username' is the ID of your Jenkins secret
+        DB_PASSWORD = credentials('db-password') // Assuming 'db-password' is the ID of your Jenkins secret
     }
     stages {
         stage('Checkout') {
@@ -18,16 +16,27 @@ pipeline {
                 git url: 'https://github.com/Azhar179/Liq-3.git', branch: 'master'
             }
         }
+        stage('Load Database Properties') {
+            steps {
+                script {
+                    // Load properties from the file
+                    def props = readProperties file: 'config/database.properties'
+                    env.DB_URL = props.DB_URL
+                    env.DB_DRIVER = props.DB_DRIVER
+                    env.LIQUIBASE_HOME = props.LIQUIBASE_HOME
+                    env.CHANGELOG_FILE = props.CHANGELOG_FILE
+                }
+            }
+        }
         stage('Update Database') {
             steps {
                 script {
-                    def changelogFile = "src/main/resources/db/changelog/changelog-master.xml"
                     sh """
-                    liquibase --changeLogFile=${changelogFile} \
-                              --url=${DB_URL} \
+                    liquibase --changeLogFile=${env.CHANGELOG_FILE} \
+                              --url=${env.DB_URL} \
                               --username=${DB_USERNAME} \
                               --password=${DB_PASSWORD} \
-                              --driver=${DB_DRIVER} update
+                              --driver=${env.DB_DRIVER} update
                     """
                 }
             }
