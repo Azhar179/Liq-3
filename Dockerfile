@@ -6,9 +6,8 @@ pipeline {
         }
     }
     environment {
-        // Retrieve the values from Jenkins secrets
-        DB_USERNAME = credentials('db-username') // Assuming 'db-username' is the ID of your Jenkins secret
-        DB_PASSWORD = credentials('db-password') // Assuming 'db-password' is the ID of your Jenkins secret
+        DB_USERNAME = 'your-username' // Hard-coded username
+        DB_PASSWORD = 'your-password' // Hard-coded password
     }
     stages {
         stage('Checkout') {
