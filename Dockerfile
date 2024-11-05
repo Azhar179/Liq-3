@@ -5,29 +5,36 @@ pipeline {
             args '-u root'
         }
     }
-    environment {
-        DB_URL = 'jdbc:mysql://localhost:3306/pam-aurora-liquibase'
-        DB_USERNAME = 'root'
-        DB_PASSWORD = 'root'
-        DB_DRIVER = 'com.mysql.cj.jdbc.Driver'
-        LIQUIBASE_CLASSPATH = '/liquibase/lib/mysql-connector-j-9.0.0.jar'  // Explicit driver path
-    }
     stages {
         stage('Checkout') {
             steps {
                 git url: 'https://github.com/Azhar179/Liq-3.git', branch: 'main'
             }
         }
+        stage('Load Configuration') {
+            steps {
+                script {
+                    // Load properties from the config file
+                    def props = readProperties file: 'config/database.properties'
+                    
+                    // Set environment variables from properties
+                    env.DB_URL = props['DB_URL']
+                    env.DB_DRIVER = props['DB_DRIVER']
+                    env.DB_USERNAME = props['DB_USERNAME']
+                    env.DB_PASSWORD = props['DB_PASSWORD']
+                    env.CHANGELOG_FILE = props['CHANGELOG_FILE']
+                }
+            }
+        }
         stage('Update Database') {
             steps {
                 script {
-                    def changelogFile = "src/main/resources/db/changelog/changelog-master.xml"
                     sh """
-                    liquibase --changeLogFile=${changelogFile} \
-                              --url=${DB_URL} \
-                              --username=${DB_USERNAME} \
-                              --password=${DB_PASSWORD} \
-                              --driver=${DB_DRIVER} update
+                    liquibase --changeLogFile=${env.CHANGELOG_FILE} \
+                              --url=${env.DB_URL} \
+                              --username=${env.DB_USERNAME} \
+                              --password=${env.DB_PASSWORD} \
+                              --driver=${env.DB_DRIVER} update
                     """
                 }
             }
