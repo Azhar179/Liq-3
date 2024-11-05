@@ -1,14 +1,15 @@
+
 pipeline {
     agent {
         docker {
-            image 'azhar1/my-new-image4'
+            image 'azhar/edstest2'
             args '-u root'
         }
     }
     stages {
         stage('Checkout') {
             steps {
-                git url: 'https://github.com/Azhar179/Liq-3.git', branch: 'main'
+                git url: 'https://github.com/Azhar179/Liq-3.git', branch: 'master'
             }
         }
         stage('Load Configuration') {
