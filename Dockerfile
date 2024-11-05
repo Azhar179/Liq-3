@@ -1,22 +1,21 @@
-
 pipeline {
     agent {
         docker {
-            image 'azhar179/eds-image5'
+            image 'azhar1/my-new-image4'
             args '-u root'
         }
     }
     environment {
-        DB_URL = "jdbc:sqlserver://dbs-db.usr.test.pib.sql.io;database=Archive;encrypt=true;trustServerCertificate=true"
-        DB_USERNAME = 'test'
-        DB_PASSWORD = 'test'
-        DB_DRIVER = 'com.microsoft.sqlserver.jdbc.SQLServerDrive'
-        LIQUIBASE_CLASSPATH = '/liquibase/lib/mssql-jdbc-11.2.1.jre8.jar'  // Explicit driver path
+        DB_URL = 'jdbc:mysql://localhost:3306/pam-aurora-liquibase'
+        DB_USERNAME = 'root'
+        DB_PASSWORD = 'root'
+        DB_DRIVER = 'com.mysql.cj.jdbc.Driver'
+        LIQUIBASE_CLASSPATH = '/liquibase/lib/mysql-connector-j-9.0.0.jar'  // Explicit driver path
     }
     stages {
         stage('Checkout') {
             steps {
-                git url: 'https://github.com/Azhar179/Liq-3.git', branch: 'master'
+                git url: 'https://github.com/Azhar179/Liq-3.git', branch: 'main'
             }
         }
         stage('Update Database') {
