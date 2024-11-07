@@ -23,29 +23,38 @@ pipeline {
                     
                     // Set environment variables from the properties file
                     env.DB_URL = props['DB_URL']
+                    env.DB_DRIVER = props['DB_DRIVER']
                     env.DB_USERNAME = props['DB_USERNAME']
                     env.DB_PASSWORD = props['DB_PASSWORD']
                     env.CHANGELOG_FILE = props['CHANGELOG_FILE']
-                    
-                    // Explicitly set the driver path
-                    if (params.databaseType == 'MySQL') {
-                        env.DB_DRIVER = '/liquibase/lib/mysql-connector-j-9.0.0.jar'
-                    } else if (params.databaseType == 'SQLServer') {
-                        env.DB_DRIVER = '/liquibase/lib/mssql-jdbc-11.2.1.jre8.jar'
-                    }
                 }
             }
         }
         stage('Update Database') {
             steps {
                 script {
-                    sh """
-                    liquibase --changeLogFile=${env.CHANGELOG_FILE} \
-                              --url=${env.DB_URL} \
-                              --username=${env.DB_USERNAME} \
-                              --password=${env.DB_PASSWORD} \
-                              --driver=${env.DB_DRIVER} update
-                    """
+                    // For MySQL
+                    if (params.databaseType == 'MySQL') {
+                        sh """
+                        liquibase --changeLogFile=${env.CHANGELOG_FILE} \
+                                  --url=${env.DB_URL} \
+                                  --username=${env.DB_USERNAME} \
+                                  --password=${env.DB_PASSWORD} \
+                                  --driver=com.mysql.cj.jdbc.Driver \
+                                  --classpath=/liquibase/lib/mysql-connector-j-9.0.0.jar update
+                        """
+                    }
+                    // For SQL Server
+                    else if (params.databaseType == 'SQLServer') {
+                        sh """
+                        liquibase --changeLogFile=${env.CHANGELOG_FILE} \
+                                  --url=${env.DB_URL} \
+                                  --username=${env.DB_USERNAME} \
+                                  --password=${env.DB_PASSWORD} \
+                                  --driver=com.microsoft.sqlserver.jdbc.SQLServerDriver \
+                                  --classpath=/liquibase/lib/mssql-jdbc-11.2.1.jre8.jar update
+                        """
+                    }
                 }
             }
         }
