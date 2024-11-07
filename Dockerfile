@@ -1,10 +1,12 @@
-
 pipeline {
     agent {
         docker {
-            image 'azhar/edstest2'
+            image 'azhar179/aws-image4'
             args '-u root'
         }
+    }
+    parameters {
+        choice(name: 'databaseType', choices: ['MySQL', 'SQLServer'], description: 'Select the database to update')
     }
     stages {
         stage('Checkout') {
@@ -15,10 +17,11 @@ pipeline {
         stage('Load Configuration') {
             steps {
                 script {
-                    // Load properties from the config file
-                    def props = readProperties file: 'config/database.properties'
+                    // Load properties based on the selected database type
+                    def propsFile = params.databaseType == 'MySQL' ? 'config/mysql-database.properties' : 'config/sqlserver-database.properties'
+                    def props = readProperties file: propsFile
                     
-                    // Set environment variables from properties
+                    // Set environment variables from the properties file
                     env.DB_URL = props['DB_URL']
                     env.DB_DRIVER = props['DB_DRIVER']
                     env.DB_USERNAME = props['DB_USERNAME']
