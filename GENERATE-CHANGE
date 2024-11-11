@@ -1,17 +1,11 @@
 # Base Liquibase image
 FROM liquibase/liquibase:latest
 
-# Check Alpine version and the available repositories
-RUN cat /etc/os-release && \
-    apk update && \
-    apk add --no-cache git
+# Update and install Git
+RUN apk update && apk add --no-cache git
 
 # Download and install the MySQL JDBC driver
 RUN curl -L -o /liquibase/lib/mysql-connector-j-9.0.0.jar https://repo1.maven.org/maven2/com/mysql/mysql-connector-j/9.0.0/mysql-connector-j-9.0.0.jar
-
-# Set up Git configuration (Optional)
-RUN git config --global user.name "Azhar Bagwan" \
-    && git config --global user.email "YourEmail@example.com"
 
 # Default command to run when container starts (can be overridden in Jenkins pipeline)
 CMD ["liquibase", "--version"]
