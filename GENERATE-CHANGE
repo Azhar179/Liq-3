@@ -1,8 +1,8 @@
 # Base Liquibase image
 FROM liquibase/liquibase:latest
 
-# Update and install Git
-RUN apk update && apk add --no-cache git
+# Update package manager and install git (use apt-get for Ubuntu/Debian-based images)
+RUN apt-get update && apt-get install -y git
 
 # Download and install the MySQL JDBC driver
 RUN curl -L -o /liquibase/lib/mysql-connector-j-9.0.0.jar https://repo1.maven.org/maven2/com/mysql/mysql-connector-j/9.0.0/mysql-connector-j-9.0.0.jar
