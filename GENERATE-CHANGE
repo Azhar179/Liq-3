@@ -1,2 +1,19 @@
-+ git config --global user.name Azhar Bagwan
-/var/lib/jenkins/workspace/user_assets_pam_aurora_cd@tmp/durable-94b0ba49/script.sh: 2: git: not found
+# Base Liquibase image
+FROM liquibase/liquibase:latest
+
+# Set the Liquibase version (optional, if needed)
+# ENV LIQUIBASE_VERSION=4.28.0
+
+# Install Git
+RUN apt-get update && apt-get install -y git
+
+# Download and install the MySQL JDBC driver
+RUN curl -L -o /liquibase/lib/mysql-connector-j-9.0.0.jar https://repo1.maven.org/maven2/com/mysql/mysql-connector-j/9.0.0/mysql-connector-j-9.0.0.jar
+
+# Set up Git configuration (Optional, you can override this in your pipeline)
+# Replace with actual username and email or make this part configurable
+RUN git config --global user.name "Azhar Bagwan" \
+    && git config --global user.email "YourEmail@example.com"
+
+# Default command to run when container starts (can be overridden in Jenkins pipeline)
+CMD ["liquibase", "--version"]
