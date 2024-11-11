@@ -1,14 +1,15 @@
 # Base Liquibase image
 FROM liquibase/liquibase:latest
 
-# Install Git using apk (Alpine package manager)
-RUN apk update && apk add --no-cache git
+# Check Alpine version and the available repositories
+RUN cat /etc/os-release && \
+    apk update && \
+    apk add --no-cache git
 
 # Download and install the MySQL JDBC driver
 RUN curl -L -o /liquibase/lib/mysql-connector-j-9.0.0.jar https://repo1.maven.org/maven2/com/mysql/mysql-connector-j/9.0.0/mysql-connector-j-9.0.0.jar
 
-# Set up Git configuration (Optional, you can override this in your pipeline)
-# Replace with actual username and email or make this part configurable
+# Set up Git configuration (Optional)
 RUN git config --global user.name "Azhar Bagwan" \
     && git config --global user.email "YourEmail@example.com"
 
