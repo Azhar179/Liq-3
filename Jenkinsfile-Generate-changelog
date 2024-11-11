@@ -1,0 +1,74 @@
+pipeline {
+    agent {
+        docker {
+            image 'azhar1/my-new-image4' // Your custom Docker image with Liquibase
+            args '-u root'
+        }
+    }
+    stages {
+        stage('Checkout') {
+            steps {
+                git url: 'https://github.com/Azhar179/Liq-3.git', branch: 'main'
+            }
+        }
+        stage('Load Configuration') {
+            steps {
+                script {
+                    // Load properties from the config file
+                    def props = readProperties file: 'config/database.properties'
+                    
+                    // Set environment variables from properties
+                    env.DB_URL = props['DB_URL']
+                    env.DB_DRIVER = props['DB_DRIVER']
+                    env.DB_USERNAME = props['DB_USERNAME']
+                    env.DB_PASSWORD = props['DB_PASSWORD']
+                }
+            }
+        }
+        stage('Generate Changelog') {
+            steps {
+                script {
+                    // Run generateChangeLog command in Liquibase
+                    sh """
+                    liquibase --url=${env.DB_URL} \
+                              --username=${env.DB_USERNAME} \
+                              --password=${env.DB_PASSWORD} \
+                              --driver=${env.DB_DRIVER} \
+                              generateChangeLog > /liquibase/generated-changelog.xml
+                    """
+                }
+            }
+        }
+        stage('Copy Generated Changelog') {
+            steps {
+                script {
+                    // Get the container ID and copy the changelog to the Jenkins workspace
+                    def containerId = sh(script: "docker ps -qf 'ancestor=azhar1/my-new-image4'", returnStdout: true).trim()
+                    sh "docker cp ${containerId}:/liquibase/generated-changelog.xml ."
+                }
+            }
+        }
+        stage('Commit and Push Changelog') {
+            steps {
+                script {
+                    // Set up Git credentials and push to GitHub
+                    sh """
+                    git config --global user.name "YourName"
+                    git config --global user.email "YourEmail@example.com"
+                    git add generated-changelog.xml
+                    git commit -m "Add generated changelog"
+                    git push https://<token>@github.com/<username>/<repository>.git
+                    """
+                }
+            }
+        }
+    }
+    post {
+        success {
+            echo 'Changelog generation and push to GitHub completed successfully.'
+        }
+        failure {
+            echo 'An error occurred in the pipeline.'
+        }
+    }
+}
