@@ -1,8 +1,8 @@
 pipeline {
     agent {
         docker {
-            image 'azhar1/my-new-image4' // Your custom Docker image with Liquibase
-            args '-u root'
+            image 'azhar1/my-new-image4'  // Your custom Docker image with Liquibase
+            args '-u root -v /var/run/docker.sock:/var/run/docker.sock'  // Mount Docker socket to enable Docker commands
         }
     }
     stages {
