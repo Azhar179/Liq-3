@@ -1,14 +1,76 @@
-# Base Liquibase image
-FROM liquibase/liquibase:latest
-
-# Use root privileges for package installation
-USER root
-
-# Update package manager and install git (use apt-get for Ubuntu/Debian-based images)
-RUN apt-get update -y && apt-get install -y git
-
-# Download and install the MySQL JDBC driver
-RUN curl -L -o /liquibase/lib/mysql-connector-j-9.0.0.jar https://repo1.maven.org/maven2/com/mysql/mysql-connector-j/9.0.0/mysql-connector-j-9.0.0.jar
-
-# Default command to run when container starts (can be overridden in Jenkins pipeline)
-CMD ["liquibase", "--version"]
+pipeline {
+    agent {
+        docker {
+            image 'your-image-name'  // Use your custom image
+            args '-u root -v /var/run/docker.sock:/var/run/docker.sock'
+        }
+    }
+    stages {
+        stage('Checkout') {
+            steps {
+                git url: 'https://github.com/Azhar179/Liq-3.git', branch: 'main'
+            }
+        }
+        stage('Load Configuration') {
+            steps {
+                script {
+                    // Load properties from the config file
+                    def props = readProperties file: 'config/database.properties'
+                    
+                    // Set environment variables from properties
+                    env.DB_URL = props['DB_URL']
+                    env.DB_DRIVER = props['DB_DRIVER']
+                    env.DB_USERNAME = props['DB_USERNAME']
+                    env.DB_PASSWORD = props['DB_PASSWORD']
+                }
+            }
+        }
+        stage('Generate Changelog') {
+            steps {
+                script {
+                    // Run generateChangeLog command in Liquibase and write to a shared location
+                    sh """
+                    git config --global --add safe.directory /var/lib/jenkins/workspace/${env.JOB_NAME}
+                    liquibase --url=${env.DB_URL} \
+                              --username=${env.DB_USERNAME} \
+                              --password=${env.DB_PASSWORD} \
+                              --driver=${env.DB_DRIVER} \
+                              generateChangeLog > /liquibase/generated-changelog.xml
+                    """
+                }
+            }
+        }
+        stage('Copy Generated Changelog to Workspace') {
+            steps {
+                script {
+                    // Copy the generated changelog from container's file system to Jenkins workspace
+                    sh """
+                    cp /liquibase/generated-changelog.xml ${WORKSPACE}/generated-changelog.xml
+                    """
+                }
+            }
+        }
+        stage('Commit and Push Changelog') {
+            steps {
+                script {
+                    // Set up Git credentials and push to GitHub
+                    sh """
+                    git config --global user.name "YourName"
+                    git config --global user.email "YourEmail@example.com"
+                    git add generated-changelog.xml
+                    git commit -m "Add generated changelog"
+                    git push https://<YOUR_GITHUB_TOKEN>@github.com/<YOUR_USERNAME>/<YOUR_REPOSITORY>.git
+                    """
+                }
+            }
+        }
+    }
+    post {
+        success {
+            echo 'Changelog generation and push to GitHub completed successfully.'
+        }
+        failure {
+            echo 'An error occurred in the pipeline.'
+        }
+    }
+}
