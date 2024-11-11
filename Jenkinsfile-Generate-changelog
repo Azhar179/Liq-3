@@ -28,7 +28,7 @@ pipeline {
         stage('Generate Changelog') {
             steps {
                 script {
-                    // Run generateChangeLog command in Liquibase
+                    // Run generateChangeLog command in Liquibase and write to a shared location
                     sh """
                     liquibase --url=${env.DB_URL} \
                               --username=${env.DB_USERNAME} \
@@ -39,12 +39,13 @@ pipeline {
                 }
             }
         }
-        stage('Copy Generated Changelog') {
+        stage('Copy Generated Changelog to Workspace') {
             steps {
                 script {
-                    // Get the container ID and copy the changelog to the Jenkins workspace
-                    def containerId = sh(script: "docker ps -qf 'ancestor=azhar1/my-new-image4'", returnStdout: true).trim()
-                    sh "docker cp ${containerId}:/liquibase/generated-changelog.xml ."
+                    // Copy the generated changelog from container's file system to Jenkins workspace
+                    sh """
+                    cp /liquibase/generated-changelog.xml ${WORKSPACE}/generated-changelog.xml
+                    """
                 }
             }
         }
