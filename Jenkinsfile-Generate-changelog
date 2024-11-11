@@ -1,8 +1,8 @@
 pipeline {
     agent {
         docker {
-            image 'azhar179/my-new-image4' // Your custom Docker image with Liquibase
-            args '-u root -v /var/run/docker.sock:/var/run/docker.sock' // Mount Docker socket
+            image 'azhar1/my-new-image4' // Your custom Docker image with Liquibase
+            args '-u root'
         }
     }
     stages {
@@ -22,23 +22,29 @@ pipeline {
                     env.DB_DRIVER = props['DB_DRIVER']
                     env.DB_USERNAME = props['DB_USERNAME']
                     env.DB_PASSWORD = props['DB_PASSWORD']
-                    env.CHANGELOG_FILE = props['CHANGELOG_FILE']
                 }
             }
         }
         stage('Generate Changelog') {
             steps {
                 script {
-                    // Run generateChangeLog command inside the Docker container
-                    docker.image('azhar179/my-new-image4').inside {
-                        sh """
-                        liquibase --url=${env.DB_URL} \
-                                  --username=${env.DB_USERNAME} \
-                                  --password=${env.DB_PASSWORD} \
-                                  --driver=${env.DB_DRIVER} \
-                                  generateChangeLog > ${env.WORKSPACE}/generated-changelog.xml
-                        """
-                    }
+                    // Run generateChangeLog command in Liquibase
+                    sh """
+                    liquibase --url=${env.DB_URL} \
+                              --username=${env.DB_USERNAME} \
+                              --password=${env.DB_PASSWORD} \
+                              --driver=${env.DB_DRIVER} \
+                              generateChangeLog > /liquibase/generated-changelog.xml
+                    """
+                }
+            }
+        }
+        stage('Copy Generated Changelog') {
+            steps {
+                script {
+                    // Get the container ID and copy the changelog to the Jenkins workspace
+                    def containerId = sh(script: "docker ps -qf 'ancestor=azhar1/my-new-image4'", returnStdout: true).trim()
+                    sh "docker cp ${containerId}:/liquibase/generated-changelog.xml ."
                 }
             }
         }
