@@ -1,14 +1,20 @@
-# Base Liquibase image
-FROM liquibase/liquibase:latest
+# Use an Ubuntu base image
+FROM ubuntu:20.04
 
-# Download and install the MySQL JDBC driver
-RUN curl -L -o /liquibase/lib/mysql-connector-j-9.0.0.jar \
-    https://repo1.maven.org/maven2/com/mysql/mysql-connector-j/9.0.0/mysql-connector-j-9.0.0.jar
-
-# Update package lists and install Git
+# Install dependencies, including curl and Git
 RUN apt-get update && \
-    apt-get install -y git && \
+    apt-get install -y git curl && \
     apt-get clean
 
-# Default command to run when container starts (can be overridden in Jenkins pipeline)
+# Download and install Liquibase
+RUN curl -L -o liquibase.zip https://github.com/liquibase/liquibase/releases/download/v4.28.0/liquibase-4.28.0.zip && \
+    unzip liquibase.zip -d /opt/liquibase && \
+    rm liquibase.zip
+
+# Add Liquibase to PATH
+ENV PATH="/opt/liquibase:${PATH}"
+
+# Install the MySQL JDBC driver
+RUN curl -L -o /opt/liquibase/lib/mysql-connector-j-9.0.0.jar https://repo1.maven.org/maven2/com/mysql/mysql-connector-j/9.0.0/mysql-connector-j-9.0.0.jar
+
 CMD ["liquibase", "--version"]
