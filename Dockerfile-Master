@@ -1,0 +1,56 @@
+# Base Liquibase image
+FROM liquibase/liquibase:latest
+
+# Switch to root user
+USER root
+
+# Install required packages including AWS CLI
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+        unzip \
+        curl \
+        python3 \
+        python3-pip && \
+    pip3 install --no-cache-dir awscli && \
+    apt-get remove --purge -y python3-pip && \
+    apt-get autoremove -y && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*  # Clean up the apt cache
+
+# Download and install the MySQL JDBC driver
+RUN curl -L -o /liquibase/lib/mysql-connector-j-9.0.0.jar https://repo1.maven.org/maven2/com/mysql/mysql-connector-j/9.0.0/mysql-connector-j-9.0.0.jar
+
+# Default command to run when the container starts (can be overridden in Jenkins pipeline)
+CMD ["liquibase", "--version"]
+
+
+FROM liquibase/liquibase:latest
+
+# Download and install the Microsoft SQL Server JDBC driver
+RUN curl -L -o /liquibase/lib/mssql-jdbc-11.2.1.jre8.jar \
+    https://repo1.maven.org/maven2/com/microsoft/sqlserver/mssql-jdbc/11.2.1.jre8/mssql-jdbc-11.2.1.jre8.jar
+
+# Download and install the MySQL JDBC driver
+RUN curl -L -o /liquibase/lib/mysql-connector-j-9.0.0.jar \
+    https://repo1.maven.org/maven2/com/mysql/mysql-connector-j/9.0.0/mysql-connector-j-9.0.0.jar
+
+# Set the classpath for the JDBC drivers
+ENV CLASSPATH=/liquibase/lib/mysql-connector-j-9.0.0.jar:/liquibase/lib/mssql-jdbc-11.2.1.jre8.jar
+
+# Default command to run when container starts (can be overridden in Jenkins pipeline)
+CMD ["liquibase", "--version"]
+
+# Base Liquibase image
+FROM liquibase/liquibase:latest
+
+# Use root privileges for package installation
+USER root
+
+# Update package manager and install git (use apt-get for Ubuntu/Debian-based images)
+RUN apt-get update -y && apt-get install -y git
+
+# Download and install the MySQL JDBC driver
+RUN curl -L -o /liquibase/lib/mysql-connector-j-9.0.0.jar https://repo1.maven.org/maven2/com/mysql/mysql-connector-j/9.0.0/mysql-connector-j-9.0.0.jar
+
+# Default command to run when container starts (can be overridden in Jenkins pipeline)
+CMD ["liquibase", "--version"]
